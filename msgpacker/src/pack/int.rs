@@ -6,12 +6,15 @@ impl Packable for u8 {
     where
         T: Extend<u8>,
     {
-        if *self <= 127 {
-            buf.extend(iter::once(self & Format::POSITIVE_FIXINT));
-            1
-        } else {
-            buf.extend(iter::once(Format::UINT8).chain(iter::once(*self)));
-            2
+        match *self {
+            0..=127 => {
+                buf.extend(iter::once(self & Format::POSITIVE_FIXINT));
+                1
+            }
+            _ => {
+                buf.extend(iter::once(Format::UINT8).chain(iter::once(*self)));
+                2
+            }
         }
     }
 }
