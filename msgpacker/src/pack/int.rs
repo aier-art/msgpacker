@@ -139,14 +139,14 @@ impl Packable for i8 {
     where
         T: Extend<u8>,
     {
+        if *self >= 0 {
+            return (*self as u8).pack(buf);
+        }
         if *self <= -33 {
             buf.extend(iter::once(Format::INT8).chain(iter::once(*self as u8)));
             2
-        } else if *self <= -1 {
-            buf.extend(iter::once((*self | -32i8) as u8));
-            1
         } else {
-            buf.extend(iter::once(*self as u8 & Format::POSITIVE_FIXINT));
+            buf.extend(iter::once((*self | -32i8) as u8));
             1
         }
     }
@@ -157,21 +157,18 @@ impl Packable for i16 {
     where
         T: Extend<u8>,
     {
+        if *self >= 0 {
+            return (*self as u16).pack(buf);
+        }
         if *self < i8::MIN as i16 {
             buf.extend(iter::once(Format::INT16).chain(self.to_be_bytes()));
             3
         } else if *self <= -33 {
             buf.extend(iter::once(Format::INT8).chain(iter::once((*self as i8) as u8)));
             2
-        } else if *self <= -1 {
+        } else {
             buf.extend(iter::once((*self as i8 | -32i8) as u8));
             1
-        } else if *self <= i8::MAX as i16 {
-            buf.extend(iter::once(*self as u8 & Format::POSITIVE_FIXINT));
-            1
-        } else {
-            buf.extend(iter::once(Format::INT16).chain(self.to_be_bytes()));
-            3
         }
     }
 }
@@ -181,6 +178,9 @@ impl Packable for i32 {
     where
         T: Extend<u8>,
     {
+        if *self >= 0 {
+            return (*self as u32).pack(buf);
+        }
         if *self < i16::MIN as i32 {
             buf.extend(iter::once(Format::INT32).chain(self.to_be_bytes()));
             5
@@ -190,18 +190,9 @@ impl Packable for i32 {
         } else if *self <= -33 {
             buf.extend(iter::once(Format::INT8).chain(iter::once((*self as i8) as u8)));
             2
-        } else if *self <= -1 {
+        } else {
             buf.extend(iter::once((*self | -32i32) as u8));
             1
-        } else if *self <= i8::MAX as i32 {
-            buf.extend(iter::once(*self as u8 & Format::POSITIVE_FIXINT));
-            1
-        } else if *self <= i16::MAX as i32 {
-            buf.extend(iter::once(Format::INT16).chain((*self as i16).to_be_bytes()));
-            3
-        } else {
-            buf.extend(iter::once(Format::INT32).chain(self.to_be_bytes()));
-            5
         }
     }
 }
@@ -211,6 +202,9 @@ impl Packable for i64 {
     where
         T: Extend<u8>,
     {
+        if *self >= 0 {
+            return (*self as u64).pack(buf);
+        }
         if *self < i32::MIN as i64 {
             buf.extend(iter::once(Format::INT64).chain(self.to_be_bytes()));
             9
@@ -223,21 +217,9 @@ impl Packable for i64 {
         } else if *self <= -33 {
             buf.extend(iter::once(Format::INT8).chain(iter::once((*self as i8) as u8)));
             2
-        } else if *self <= -1 {
+        } else {
             buf.extend(iter::once((*self | -32i64) as u8));
             1
-        } else if *self <= i8::MAX as i64 {
-            buf.extend(iter::once(*self as u8 & Format::POSITIVE_FIXINT));
-            1
-        } else if *self <= i16::MAX as i64 {
-            buf.extend(iter::once(Format::INT16).chain((*self as i16).to_be_bytes()));
-            3
-        } else if *self <= i32::MAX as i64 {
-            buf.extend(iter::once(Format::INT32).chain((*self as i32).to_be_bytes()));
-            5
-        } else {
-            buf.extend(iter::once(Format::INT64).chain(self.to_be_bytes()));
-            9
         }
     }
 }
@@ -247,6 +229,9 @@ impl Packable for i128 {
     where
         T: Extend<u8>,
     {
+        if *self >= 0 {
+            return (*self as u128).pack(buf);
+        }
         if *self < i64::MIN as i128 {
             buf.extend(
                 iter::once(Format::BIN8)
@@ -266,28 +251,9 @@ impl Packable for i128 {
         } else if *self <= -33 {
             buf.extend(iter::once(Format::INT8).chain(iter::once((*self as i8) as u8)));
             2
-        } else if *self <= -1 {
+        } else {
             buf.extend(iter::once((*self | -32i128) as u8));
             1
-        } else if *self <= i8::MAX as i128 {
-            buf.extend(iter::once(*self as u8 & Format::POSITIVE_FIXINT));
-            1
-        } else if *self <= i16::MAX as i128 {
-            buf.extend(iter::once(Format::INT16).chain((*self as i16).to_be_bytes()));
-            3
-        } else if *self <= i32::MAX as i128 {
-            buf.extend(iter::once(Format::INT32).chain((*self as i32).to_be_bytes()));
-            5
-        } else if *self <= i64::MAX as i128 {
-            buf.extend(iter::once(Format::INT64).chain((*self as i64).to_be_bytes()));
-            9
-        } else {
-            buf.extend(
-                iter::once(Format::BIN8)
-                    .chain(iter::once(16))
-                    .chain(self.to_be_bytes()),
-            );
-            18
         }
     }
 }
@@ -297,6 +263,9 @@ impl Packable for isize {
     where
         T: Extend<u8>,
     {
+        if *self >= 0 {
+            return (*self as usize).pack(buf);
+        }
         if *self < i32::MIN as isize {
             buf.extend(iter::once(Format::INT64).chain(self.to_be_bytes()));
             9
@@ -309,21 +278,9 @@ impl Packable for isize {
         } else if *self <= -33 {
             buf.extend(iter::once(Format::INT8).chain(iter::once((*self as i8) as u8)));
             2
-        } else if *self <= -1 {
+        } else {
             buf.extend(iter::once((*self | -32isize) as u8));
             1
-        } else if *self <= i8::MAX as isize {
-            buf.extend(iter::once(*self as u8 & Format::POSITIVE_FIXINT));
-            1
-        } else if *self <= i16::MAX as isize {
-            buf.extend(iter::once(Format::INT16).chain((*self as i16).to_be_bytes()));
-            3
-        } else if *self <= i32::MAX as isize {
-            buf.extend(iter::once(Format::INT32).chain((*self as i32).to_be_bytes()));
-            5
-        } else {
-            buf.extend(iter::once(Format::INT64).chain(self.to_be_bytes()));
-            9
         }
     }
 }
