@@ -1,5 +1,5 @@
 [package]
-name = "msgpacker"
+name = "xxai-msgpacker"
 version = "0.4.4"
 authors = ["Victor Lopez <victor@codx.io>"]
 categories = ["compression", "encoding", "parser-implementations"]
